@@ -1,4 +1,4 @@
-package webapi
+package webevent
 
 import (
 	"syscall/js"
@@ -6,16 +6,45 @@ import (
 
 	"github.com/codeation/canvas/jsw"
 	"github.com/codeation/impress/event"
+	"github.com/codeation/impress/joint/iface"
 )
 
-func (w *webAPI) onResize(this js.Value, args []js.Value) any {
+type webEvent struct {
+	callbacks iface.CallbackSet
+	window    js.Value
+}
+
+func New(callbacks iface.CallbackSet) {
+	w := &webEvent{
+		callbacks: callbacks,
+		window:    js.Global().Get(jsw.Window),
+	}
+
+	w.window.Call(jsw.AddEventListener, jsw.Resize, js.FuncOf(w.onResize))
+	w.onResize(js.ValueOf(nil), nil)
+
+	w.window.Call(jsw.AddEventListener, jsw.Pointerup, js.FuncOf(w.onPointerUp))
+	w.window.Call(jsw.AddEventListener, jsw.Pointerdown, js.FuncOf(w.onPointerDown))
+	w.window.Call(jsw.AddEventListener, jsw.Dblclick, js.FuncOf(w.onDoubleClick))
+	w.window.Call(jsw.AddEventListener, jsw.Contextmenu, js.FuncOf(w.onContextMenu))
+	w.window.Call(jsw.AddEventListener, jsw.Mousemove, js.FuncOf(w.onMousemove))
+	w.window.Call(jsw.AddEventListener, jsw.Wheel, js.FuncOf(w.onWheel))
+
+	w.window.Call(jsw.AddEventListener, jsw.Keydown, js.FuncOf(w.onKeyDown))
+
+	w.window.Call(jsw.AddEventListener, jsw.Unload, js.FuncOf(w.onUnload))
+	w.window.Call(jsw.AddEventListener, jsw.Beforeunload, js.FuncOf(w.onUnload))
+
+}
+
+func (w *webEvent) onResize(this js.Value, args []js.Value) any {
 	w.callbacks.EventConfigure(
 		w.window.Get(jsw.OuterWidth).Int(), w.window.Get(jsw.OuterHeight).Int(),
 		w.window.Get(jsw.InnerWidth).Int(), w.window.Get(jsw.InnerHeight).Int())
 	return js.ValueOf(true)
 }
 
-func (w *webAPI) onButton(this js.Value, args []js.Value, action int) any {
+func (w *webEvent) onButton(this js.Value, args []js.Value, action int) any {
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -28,19 +57,19 @@ func (w *webAPI) onButton(this js.Value, args []js.Value, action int) any {
 	return js.ValueOf(true)
 }
 
-func (w *webAPI) onPointerDown(this js.Value, args []js.Value) any {
+func (w *webEvent) onPointerDown(this js.Value, args []js.Value) any {
 	return w.onButton(this, args, event.ButtonActionPress)
 }
 
-func (w *webAPI) onPointerUp(this js.Value, args []js.Value) any {
+func (w *webEvent) onPointerUp(this js.Value, args []js.Value) any {
 	return w.onButton(this, args, event.ButtonActionRelease)
 }
 
-func (w *webAPI) onDoubleClick(this js.Value, args []js.Value) any {
+func (w *webEvent) onDoubleClick(this js.Value, args []js.Value) any {
 	return w.onButton(this, args, event.ButtonActionDouble)
 }
 
-func (w *webAPI) onContextMenu(this js.Value, args []js.Value) any {
+func (w *webEvent) onContextMenu(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -48,7 +77,7 @@ func (w *webAPI) onContextMenu(this js.Value, args []js.Value) any {
 	return js.ValueOf(false)
 }
 
-func (w *webAPI) onMousemove(this js.Value, args []js.Value) any {
+func (w *webEvent) onMousemove(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -63,7 +92,7 @@ func (w *webAPI) onMousemove(this js.Value, args []js.Value) any {
 	return js.ValueOf(true)
 }
 
-func (w *webAPI) onWheel(this js.Value, args []js.Value) any {
+func (w *webEvent) onWheel(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -75,7 +104,7 @@ func (w *webAPI) onWheel(this js.Value, args []js.Value) any {
 	return js.ValueOf(false)
 }
 
-func (w *webAPI) onKeyDown(this js.Value, args []js.Value) any {
+func (w *webEvent) onKeyDown(this js.Value, args []js.Value) any {
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -94,7 +123,7 @@ func (w *webAPI) onKeyDown(this js.Value, args []js.Value) any {
 	return js.ValueOf(true)
 }
 
-func (w *webAPI) onUnload(this js.Value, args []js.Value) any {
+func (w *webEvent) onUnload(this js.Value, args []js.Value) any {
 	w.callbacks.EventGeneral(event.DestroyEvent.Event)
 	return js.ValueOf(true)
 }
