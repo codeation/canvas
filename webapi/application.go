@@ -35,6 +35,6 @@ func New() *webAPI {
 func (w *webAPI) ApplicationTitle(title string)           {}
 func (w *webAPI) ApplicationSize(x, y, width, height int) {}
 func (w *webAPI) ApplicationExit() string                 { return "" }
-func (w *webAPI) ApplicationVersion() string              { return "" }
+func (w *webAPI) ApplicationVersion() string              { return canvasVersion }
 
 func (w *webAPI) Sync() {}

@@ -4,37 +4,47 @@ import (
 	"syscall/js"
 	"unicode/utf8"
 
-	"github.com/codeation/canvas/jsw"
 	"github.com/codeation/impress/event"
 	"github.com/codeation/impress/joint/iface"
+
+	"github.com/codeation/canvas/jsw"
+	"github.com/codeation/canvas/jsw/eventlist"
 )
 
 type webEvent struct {
 	callbacks iface.CallbackSet
 	window    js.Value
+	eventList *eventlist.EventList
 }
 
-func New(callbacks iface.CallbackSet) {
+func New(callbacks iface.CallbackSet) *webEvent {
+	window := js.Global().Get(jsw.Window)
 	w := &webEvent{
 		callbacks: callbacks,
-		window:    js.Global().Get(jsw.Window),
+		window:    window,
+		eventList: eventlist.NewEventList(window),
 	}
 
-	w.window.Call(jsw.AddEventListener, jsw.Resize, js.FuncOf(w.onResize))
-	w.onResize(js.ValueOf(nil), nil)
+	go w.onResize(js.ValueOf(nil), nil)
+	w.eventList.Add(jsw.Resize, w.onResize)
 
-	w.window.Call(jsw.AddEventListener, jsw.Pointerup, js.FuncOf(w.onPointerUp))
-	w.window.Call(jsw.AddEventListener, jsw.Pointerdown, js.FuncOf(w.onPointerDown))
-	w.window.Call(jsw.AddEventListener, jsw.Dblclick, js.FuncOf(w.onDoubleClick))
-	w.window.Call(jsw.AddEventListener, jsw.Contextmenu, js.FuncOf(w.onContextMenu))
-	w.window.Call(jsw.AddEventListener, jsw.Mousemove, js.FuncOf(w.onMousemove))
-	w.window.Call(jsw.AddEventListener, jsw.Wheel, js.FuncOf(w.onWheel))
+	w.eventList.Add(jsw.Pointerup, w.onPointerUp)
+	w.eventList.Add(jsw.Pointerdown, w.onPointerDown)
+	w.eventList.Add(jsw.Dblclick, w.onDoubleClick)
+	w.eventList.Add(jsw.Contextmenu, w.onContextMenu)
+	w.eventList.Add(jsw.Mousemove, w.onMousemove)
+	w.eventList.Add(jsw.Wheel, w.onWheel)
 
-	w.window.Call(jsw.AddEventListener, jsw.Keydown, js.FuncOf(w.onKeyDown))
+	w.eventList.Add(jsw.Keydown, w.onKeyDown)
 
-	w.window.Call(jsw.AddEventListener, jsw.Unload, js.FuncOf(w.onUnload))
-	w.window.Call(jsw.AddEventListener, jsw.Beforeunload, js.FuncOf(w.onUnload))
+	w.eventList.Add(jsw.Unload, w.onUnload)
+	w.eventList.Add(jsw.Beforeunload, w.onUnload)
 
+	return w
+}
+
+func (w *webEvent) Done() {
+	w.eventList.Done()
 }
 
 func (w *webEvent) onResize(this js.Value, args []js.Value) any {

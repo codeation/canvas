@@ -30,7 +30,7 @@ func (w *webAPI) WindowNew(windowID int, frameID int, x, y, width, height int) {
 
 	canvas := w.document.Call(jsw.CreateElement, jsw.Canvas)
 	canvasStyle := canvas.Get(jsw.Style)
-	canvasStyle.Set(jsw.Position, jsw.Absolute)
+	canvasStyle.Set(jsw.Position, jsw.Fixed)
 	canvasStyle.Set(jsw.Left, px(x))
 	canvasStyle.Set(jsw.Top, px(y))
 	canvasStyle.Set(jsw.Width, px(width))

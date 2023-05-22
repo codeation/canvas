@@ -33,11 +33,12 @@ func (w *webAPI) FrameNew(frameID int, parentFrameID int, x, y, width, height in
 
 	div := w.document.Call(jsw.CreateElement, jsw.Div)
 	divStyle := div.Get(jsw.Style)
-	divStyle.Set(jsw.Position, jsw.Absolute)
+	divStyle.Set(jsw.Position, jsw.Fixed)
 	divStyle.Set(jsw.Left, px(x+offsetX))
 	divStyle.Set(jsw.Top, px(y+offsetY))
 	divStyle.Set(jsw.Width, px(width))
 	divStyle.Set(jsw.Height, px(height))
+	divStyle.Set(jsw.Overflow, jsw.Hidden)
 
 	parent.Call(jsw.AppendChild, div)
 

@@ -1,6 +1,8 @@
 package webapi
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var styleName = map[int]string{
 	0: "normal",

@@ -35,7 +35,7 @@ func (w *webAPI) FontNew(fontID int, height int, style, variant, weight, stretch
 		canvas:   canvas,
 		cssValue: cssValue,
 		height:   height,
-		r:        js.Global().Get("Range").New(),
+		r:        js.Global().Get(jsw.Range).New(),
 		baseline: baseline,
 	}
 
