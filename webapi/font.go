@@ -18,7 +18,7 @@ type font struct {
 	baseline int
 }
 
-func (w *webAPI) FontNew(fontID int, height int, style, variant, weight, stretch int, family string) (int, int, int) {
+func (w *webAPI) FontNew(fontID int, height int, style, variant, weight, stretch int, family string) (int, int, int, int) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	cssValue := fontValue(height, style, variant, weight, stretch, family)
@@ -28,6 +28,7 @@ func (w *webAPI) FontNew(fontID int, height int, style, variant, weight, stretch
 	metrics := canvasCtx.Call(jsw.MeasureText, "Gg")
 	ascent := int(metrics.Get(jsw.FontBoundingBoxAscent).Float())
 	descent := int(metrics.Get(jsw.FontBoundingBoxDescent).Float())
+	lineheight := height
 	baseline := ascent
 
 	w.fonts[fontID] = &font{
@@ -39,7 +40,7 @@ func (w *webAPI) FontNew(fontID int, height int, style, variant, weight, stretch
 		baseline: baseline,
 	}
 
-	return baseline, ascent, descent
+	return lineheight, baseline, ascent, descent
 }
 
 func (w *webAPI) FontDrop(fontID int) {
