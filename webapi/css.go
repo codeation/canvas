@@ -32,8 +32,8 @@ func fontValue(height int, style, variant, weight, stretch int, family string) s
 		styleName[style], variantName[variant], weight, stretchName[stretch], height, family)
 }
 
-func color(r, g, b uint16) string {
-	return fmt.Sprintf("rgb(%d,%d,%d)", r/0x100, g/0x100, b/0x100)
+func color(r, g, b, a uint16) string {
+	return fmt.Sprintf("rgba(%d,%d,%d,%3.2f)", r/0x100, g/0x100, b/0x100, float64(a)/float64(0xFFFF))
 }
 
 func px(value int) string {

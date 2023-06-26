@@ -105,7 +105,7 @@ func (w *webAPI) WindowSize(windowID int, x, y, width, height int) {
 	}
 }
 
-func (w *webAPI) WindowFill(windowID int, x, y, width, height int, r, g, b uint16) {
+func (w *webAPI) WindowFill(windowID int, x, y, width, height int, r, g, b, a uint16) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	window, ok := w.windows[windowID]
@@ -114,11 +114,11 @@ func (w *webAPI) WindowFill(windowID int, x, y, width, height int, r, g, b uint1
 		return
 	}
 
-	window.canvasCtx.Set(jsw.FillStyle, color(r, g, b))
+	window.canvasCtx.Set(jsw.FillStyle, color(r, g, b, a))
 	window.canvasCtx.Call(jsw.FillRect, x, y, width, height)
 }
 
-func (w *webAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b uint16) {
+func (w *webAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b, a uint16) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	window, ok := w.windows[windowID]
@@ -127,7 +127,7 @@ func (w *webAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b uint16) {
 		return
 	}
 
-	window.canvasCtx.Set(jsw.StrokeStyle, color(r, g, b))
+	window.canvasCtx.Set(jsw.StrokeStyle, color(r, g, b, a))
 	window.canvasCtx.Set(jsw.LineWidth, 1)
 	window.canvasCtx.Call(jsw.BeginPath)
 	window.canvasCtx.Call(jsw.MoveTo, float64(x0)+0.5, float64(y0)+0.5)
@@ -135,7 +135,7 @@ func (w *webAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b uint16) {
 	window.canvasCtx.Call(jsw.Stroke)
 }
 
-func (w *webAPI) WindowText(windowID int, x, y int, r, g, b uint16, fontID int, height int, text string) {
+func (w *webAPI) WindowText(windowID int, x, y int, r, g, b, a uint16, fontID int, height int, text string) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	window, ok := w.windows[windowID]
@@ -151,7 +151,7 @@ func (w *webAPI) WindowText(windowID int, x, y int, r, g, b uint16, fontID int, 
 	}
 
 	window.canvasCtx.Set(jsw.Font, font.cssValue)
-	window.canvasCtx.Set(jsw.FillStyle, color(r, g, b))
+	window.canvasCtx.Set(jsw.FillStyle, color(r, g, b, a))
 	window.canvasCtx.Call(jsw.FillText, text, x, y+font.baseline)
 }
 

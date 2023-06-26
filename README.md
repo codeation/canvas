@@ -12,7 +12,7 @@ Reasons to have a browser version for a GUI app:
 
 ## Hello world
 
-<img src="https://codeation.github.io/images/canvas_hello.png" width="749" height="685" />
+<img src="https://codeation.github.io/images/canvas_small.png" width="675" height="445" />
 
 Source:
 
@@ -20,36 +20,36 @@ Source:
 package main
 
 import (
-	"image"
-	"image/color"
+    "image"
+    "image/color"
 
-	"github.com/codeation/impress"
-	"github.com/codeation/impress/event"
+    "github.com/codeation/impress"
+    "github.com/codeation/impress/event"
 
-	_ "github.com/codeation/impress/canvas"
+    _ "github.com/codeation/impress/canvas"
 )
 
 func main() {
-	app := impress.NewApplication(image.Rect(0, 0, 640, 480), "Hello World Application")
-	defer app.Close()
+    app := impress.NewApplication(image.Rect(0, 0, 480, 240), "Hello World Application")
+    defer app.Close()
 
-	font := impress.NewFont(15, map[string]string{"family": "Verdana"})
-	defer font.Close()
+    font := impress.NewFont(15, map[string]string{"family": "Verdana"})
+    defer font.Close()
 
-	w := app.NewWindow(image.Rect(0, 0, 640, 480), color.RGBA{240, 240, 240, 0})
-	defer w.Drop()
+    w := app.NewWindow(image.Rect(0, 0, 480, 240), color.RGBA{240, 240, 240, 255})
+    defer w.Drop()
 
-	w.Text("Hello, world!", font, image.Pt(280, 210), color.RGBA{0, 0, 0, 0})
-	w.Line(image.Pt(270, 230), image.Pt(380, 230), color.RGBA{255, 0, 0, 0})
-	w.Show()
-	app.Sync()
+    w.Text("Hello, world!", font, image.Pt(200, 100), color.RGBA{0, 0, 0, 255})
+    w.Line(image.Pt(200, 120), image.Pt(300, 120), color.RGBA{255, 0, 0, 255})
+    w.Show()
+    app.Sync()
 
-	for {
-		action := <-app.Chan()
-		if action == event.DestroyEvent || action == event.KeyExit {
-			break
-		}
-	}
+    for {
+        action := <-app.Chan()
+        if action == event.DestroyEvent || action == event.KeyExit {
+            break
+        }
+    }
 }
 ```
 
@@ -71,4 +71,4 @@ To see results, open `http://localhost:8080/` in you browser. Please, try with B
 
 - The performance of the browser will not be enough for the regular use.
 - This project is still in the early stages of development and is not yet in a usable state.
-- The project tested on Debian 11.7 with Brave browser (Version 1.51.114 Chromium: 113.0.5672.92).
+- The project tested on Debian 12.0 with Brave browser (Version 1.52.126 Chromium: 114.0.5735.133).
