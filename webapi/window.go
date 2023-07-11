@@ -135,7 +135,7 @@ func (w *webAPI) WindowLine(windowID int, x0, y0, x1, y1 int, r, g, b, a uint16)
 	window.canvasCtx.Call(jsw.Stroke)
 }
 
-func (w *webAPI) WindowText(windowID int, x, y int, r, g, b, a uint16, fontID int, height int, text string) {
+func (w *webAPI) WindowText(windowID int, x, y int, r, g, b, a uint16, fontID int, text string) {
 	w.mutex.RLock()
 	defer w.mutex.RUnlock()
 	window, ok := w.windows[windowID]
