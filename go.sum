@@ -1,5 +1,5 @@
-github.com/codeation/impress v0.3.8 h1:Y0VrskCi/pm5VzrC5nJ1y48gpAFd4w1OfepAx/lHtA0=
-github.com/codeation/impress v0.3.8/go.mod h1:uqgetDR8SQknprV54FcaBxXA8ADT1PoHJc22ENHV1O0=
+github.com/codeation/impress v0.4.0 h1:msHhri/hrqac8h9Qo8A1slMLs5zt+exENTtsitNHz/s=
+github.com/codeation/impress v0.4.0/go.mod h1:+6BJSTl5JSge6oP/ritWDJBbSuSWktMUjyoslsKCJJQ=
 github.com/codeation/lru v1.2.2 h1:hWMs0CF/WzNexZ9VH+9GTogmjpW3FBJUF/LZcb9Payo=
 github.com/codeation/lru v1.2.2/go.mod h1:1C9+zUoRETpelIbMxh6wj9APf2VnKh0tk9aRsrOQUsk=
 golang.org/x/net v0.19.0 h1:zTwKpTd2XuCqf8huc7Fo2iSy+4RHPd10s4KzeTnVr1c=
