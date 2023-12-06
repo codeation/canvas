@@ -36,5 +36,7 @@ func (w *webAPI) ApplicationTitle(title string)           {}
 func (w *webAPI) ApplicationSize(x, y, width, height int) {}
 func (w *webAPI) ApplicationExit() string                 { return "" }
 func (w *webAPI) ApplicationVersion() string              { return canvasVersion }
+func (w *webAPI) ClipboardGet(typeID int)                 {}
+func (w *webAPI) ClipboardPut(typeID int, data []byte)    {}
 
 func (w *webAPI) Sync() {}
