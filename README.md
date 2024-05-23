@@ -71,4 +71,4 @@ To see results, open `http://localhost:8080/` in you browser. Please, try with B
 
 - The performance of the browser will not be enough for the regular use.
 - This project is still in the early stages of development and is not yet in a usable state.
-- The project tested on Debian 12.0 with Brave browser (Version 1.52.126 Chromium: 114.0.5735.133).
+- The project tested on Debian 12.5 with Brave browser (Version 1.66.113 Chromium: 125.0.6422.76).
