@@ -27,7 +27,7 @@ func main() {
 
 	for {
 		e := <-app.Chan()
-		if e == event.DestroyEvent || e == event.KeyExit {
+		if e == event.DestroyEvent {
 			break
 		}
 	}
