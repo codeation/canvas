@@ -1,3 +1,3 @@
 package webapi
 
-const canvasVersion = "0.5.1"
+const canvasAPIVersion = "api-6"
