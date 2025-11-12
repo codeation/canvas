@@ -82,6 +82,8 @@ func (c *ClientSocket) onClose(this js.Value, args []js.Value) any {
 
 func (c *ClientSocket) onMessage(this js.Value, args []js.Value) any {
 	message := args[0]
-	c.recvW.Write([]byte(message.Get(jsw.Data).String()))
+	if _, err := c.recvW.Write([]byte(message.Get(jsw.Data).String())); err != nil {
+		c.recvW.CloseWithError(err)
+	}
 	return js.ValueOf(true)
 }
