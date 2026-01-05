@@ -9,21 +9,23 @@ import (
 )
 
 type webAPI struct {
-	document js.Value
-	window   js.Value
-	frames   map[int]*frame
-	windows  map[int]*window
-	fonts    map[int]*font
-	mutex    sync.RWMutex
+	document    js.Value
+	window      js.Value
+	frames      map[int]*frame
+	windows     map[int]*window
+	fonts       map[int]*font
+	metricFonts map[int]*font
+	mutex       sync.RWMutex
 }
 
 func New() *webAPI {
 	w := &webAPI{
-		document: js.Global().Get(jsw.Document),
-		window:   js.Global().Get(jsw.Window),
-		frames:   map[int]*frame{},
-		windows:  map[int]*window{},
-		fonts:    map[int]*font{},
+		document:    js.Global().Get(jsw.Document),
+		window:      js.Global().Get(jsw.Window),
+		frames:      map[int]*frame{},
+		windows:     map[int]*window{},
+		fonts:       map[int]*font{},
+		metricFonts: map[int]*font{},
 	}
 
 	w.document.Get(jsw.Body).Get(jsw.Style).Set(jsw.Margin, 0)
