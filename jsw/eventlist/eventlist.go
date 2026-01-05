@@ -11,18 +11,18 @@ type eventFunc struct {
 	funcOf js.Func
 }
 
-type EventList struct {
+type EventListeners struct {
 	original   js.Value
 	eventFuncs []eventFunc
 }
 
-func NewEventList(original js.Value) *EventList {
-	return &EventList{
+func NewEventListeners(original js.Value) *EventListeners {
+	return &EventListeners{
 		original: original,
 	}
 }
 
-func (el *EventList) Add(event string, f func(this js.Value, args []js.Value) any) {
+func (el *EventListeners) Add(event string, f func(this js.Value, args []js.Value) any) {
 	funcOf := js.FuncOf(f)
 	el.original.Call(jsw.AddEventListener, event, funcOf)
 	el.eventFuncs = append(el.eventFuncs, eventFunc{
@@ -31,7 +31,7 @@ func (el *EventList) Add(event string, f func(this js.Value, args []js.Value) an
 	})
 }
 
-func (el *EventList) Done() {
+func (el *EventListeners) Done() {
 	for _, e := range el.eventFuncs {
 		el.original.Call(jsw.RemoveEventListener, e.event, e.funcOf)
 		e.funcOf.Release()

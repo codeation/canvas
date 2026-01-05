@@ -2,8 +2,8 @@ package clientsocket
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
-	"sync"
 	"syscall/js"
 
 	"github.com/codeation/canvas/jsw"
@@ -12,78 +12,67 @@ import (
 
 type ClientSocket struct {
 	ws          js.Value
-	eventList   *eventlist.EventList
-	isConnected chan struct{}
-	waitOnce    sync.Once
-	doneOnce    sync.Once
-	recvR       io.Reader
-	recvW       *io.PipeWriter
-	recvPipeR   *io.PipeReader
+	listeners   *eventlist.EventListeners
+	waitOpening chan struct{}
+	reader      io.Reader
+	writer      *io.PipeWriter
+	closer      *io.PipeReader
 }
 
 func Dial(address string) *ClientSocket {
-	pipeR, pipeW := io.Pipe()
+	pipeReader, pipeWriter := io.Pipe()
 	ws := js.Global().Get(jsw.WebSocket).New(address)
 	c := &ClientSocket{
 		ws:          ws,
-		eventList:   eventlist.NewEventList(ws),
-		isConnected: make(chan struct{}),
-		recvR:       base64.NewDecoder(base64.StdEncoding, pipeR),
-		recvW:       pipeW,
-		recvPipeR:   pipeR,
+		listeners:   eventlist.NewEventListeners(ws),
+		waitOpening: make(chan struct{}),
+		reader:      base64.NewDecoder(base64.StdEncoding, pipeReader),
+		writer:      pipeWriter,
+		closer:      pipeReader,
 	}
-	c.eventList.Add(jsw.Open, c.onOpen)
-	c.eventList.Add(jsw.Error, c.onError)
-	c.eventList.Add(jsw.Close, c.onClose)
-	c.eventList.Add(jsw.Message, c.onMessage)
+	c.listeners.Add(jsw.Open, c.onOpen)
+	c.listeners.Add(jsw.Error, c.onError)
+	c.listeners.Add(jsw.Close, c.onClose)
+	c.listeners.Add(jsw.Message, c.onMessage)
 	return c
 }
 
 func (c *ClientSocket) Close() error {
-	c.doneOnce.Do(c.doneConnect)
-	c.recvPipeR.Close()
-	c.eventList.Done()
+	c.closer.Close()
+	c.listeners.Done()
 	c.ws.Call(jsw.Close)
 	return nil
 }
 
 func (c *ClientSocket) Write(data []byte) (int, error) {
-	c.waitOnce.Do(c.waitConnect)
+	<-c.waitOpening
 	c.ws.Call(jsw.Send, base64.StdEncoding.EncodeToString(data))
 	return len(data), nil
 }
 
 func (c *ClientSocket) Read(data []byte) (int, error) {
-	return c.recvR.Read(data)
-}
-
-func (c *ClientSocket) waitConnect() {
-	<-c.isConnected
-}
-
-func (c *ClientSocket) doneConnect() {
-	close(c.isConnected)
+	return c.reader.Read(data)
 }
 
 func (c *ClientSocket) onOpen(this js.Value, args []js.Value) any {
-	c.doneOnce.Do(c.doneConnect)
-	return js.ValueOf(true)
+	close(c.waitOpening)
+	return nil
 }
 
 func (c *ClientSocket) onError(this js.Value, args []js.Value) any {
-	c.doneOnce.Do(c.doneConnect)
-	return js.ValueOf(true)
+	c.closer.CloseWithError(errors.New(args[0].Get(jsw.Type).String()))
+	return nil
 }
 
 func (c *ClientSocket) onClose(this js.Value, args []js.Value) any {
 	c.Close()
-	return js.ValueOf(true)
+	return nil
 }
 
 func (c *ClientSocket) onMessage(this js.Value, args []js.Value) any {
 	message := args[0]
-	if _, err := c.recvW.Write([]byte(message.Get(jsw.Data).String())); err != nil {
-		c.recvW.CloseWithError(err)
+	if _, err := c.writer.Write([]byte(message.Get(jsw.Data).String())); err != nil {
+		c.writer.CloseWithError(err)
 	}
-	return js.ValueOf(true)
+	return nil
 }

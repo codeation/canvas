@@ -81,6 +81,7 @@ const (
 	TextIndent             = "text-indent"
 	TextContent            = "textContent"
 	Top                    = "top"
+	Type                   = "type"
 	Unload                 = "unload"
 	Visibility             = "visibility"
 	WebSocket              = "WebSocket"

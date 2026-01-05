@@ -14,7 +14,7 @@ import (
 type webEvent struct {
 	callbacks iface.CallbackSet
 	window    js.Value
-	eventList *eventlist.EventList
+	listeners *eventlist.EventListeners
 }
 
 func New(callbacks iface.CallbackSet) *webEvent {
@@ -22,29 +22,29 @@ func New(callbacks iface.CallbackSet) *webEvent {
 	w := &webEvent{
 		callbacks: callbacks,
 		window:    window,
-		eventList: eventlist.NewEventList(window),
+		listeners: eventlist.NewEventListeners(window),
 	}
 
 	go w.onResize(js.ValueOf(nil), nil)
-	w.eventList.Add(jsw.Resize, w.onResize)
+	w.listeners.Add(jsw.Resize, w.onResize)
 
-	w.eventList.Add(jsw.Pointerup, w.onPointerUp)
-	w.eventList.Add(jsw.Pointerdown, w.onPointerDown)
-	w.eventList.Add(jsw.Dblclick, w.onDoubleClick)
-	w.eventList.Add(jsw.Contextmenu, w.onContextMenu)
-	w.eventList.Add(jsw.Mousemove, w.onMousemove)
-	w.eventList.Add(jsw.Wheel, w.onWheel)
+	w.listeners.Add(jsw.Pointerup, w.onPointerUp)
+	w.listeners.Add(jsw.Pointerdown, w.onPointerDown)
+	w.listeners.Add(jsw.Dblclick, w.onDoubleClick)
+	w.listeners.Add(jsw.Contextmenu, w.onContextMenu)
+	w.listeners.Add(jsw.Mousemove, w.onMousemove)
+	w.listeners.Add(jsw.Wheel, w.onWheel)
 
-	w.eventList.Add(jsw.Keydown, w.onKeyDown)
+	w.listeners.Add(jsw.Keydown, w.onKeyDown)
 
-	w.eventList.Add(jsw.Unload, w.onUnload)
-	w.eventList.Add(jsw.Beforeunload, w.onUnload)
+	w.listeners.Add(jsw.Unload, w.onUnload)
+	w.listeners.Add(jsw.Beforeunload, w.onUnload)
 
 	return w
 }
 
 func (w *webEvent) Done() {
-	w.eventList.Done()
+	w.listeners.Done()
 }
 
 func (w *webEvent) onResize(this js.Value, args []js.Value) any {
