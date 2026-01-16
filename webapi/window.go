@@ -61,19 +61,29 @@ func (w *webAPI) WindowDrop(windowID int) {
 		return
 	}
 
-	frame, ok := w.frames[window.frameID]
-	if !ok {
-		log.Printf("WindowDrop: frame not found: %d", window.frameID)
-		return
-	}
-
-	frame.div.Call(jsw.RemoveChild, window.canvas)
 	window.canvas.Call(jsw.Remove)
 
 	delete(w.windows, windowID)
 }
 
-func (w *webAPI) WindowRaise(windowID int) {}
+func (w *webAPI) WindowRaise(windowID int) {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	window, ok := w.windows[windowID]
+	if !ok {
+		log.Printf("WindowRaise: window not found: %d", windowID)
+		return
+	}
+
+	frame, ok := w.frames[window.frameID]
+	if !ok {
+		log.Printf("WindowRaise: frame not found: %d", window.frameID)
+		return
+	}
+
+	frame.div.Call(jsw.AppendChild, window.canvas)
+}
+
 func (w *webAPI) WindowClear(windowID int) {}
 func (w *webAPI) WindowShow(windowID int)  {}
 
@@ -155,4 +165,20 @@ func (w *webAPI) WindowText(windowID int, x, y int, r, g, b, a uint16, fontID in
 	window.canvasCtx.Call(jsw.FillText, text, x, y+font.baseline)
 }
 
-func (w *webAPI) WindowImage(windowID int, x, y, width, height int, imageID int) {}
+func (w *webAPI) WindowImage(windowID int, x, y, width, height int, imageID int) {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	window, ok := w.windows[windowID]
+	if !ok {
+		log.Printf("WindowImage: window not found: %d", windowID)
+		return
+	}
+
+	image, ok := w.images[imageID]
+	if !ok {
+		log.Printf("WindowImage: image not found: %d", imageID)
+		return
+	}
+
+	window.canvasCtx.Call(jsw.DrawImage, image.canvas, x, y, width, height)
+}

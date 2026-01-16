@@ -70,7 +70,6 @@ const (
 	PutImageData           = "putImageData"
 	Range                  = "Range"
 	Remove                 = "remove"
-	RemoveChild            = "removeChild"
 	RemoveEventListener    = "removeEventListener"
 	Resize                 = "resize"
 	Scale                  = "scale"

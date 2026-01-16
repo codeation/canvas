@@ -60,19 +60,6 @@ func (w *webAPI) FrameDrop(frameID int) {
 		return
 	}
 
-	var parent js.Value
-	if f.parentID == 0 {
-		parent = w.document.Get(jsw.Body)
-	} else {
-		parentFrame, ok := w.frames[f.parentID]
-		if !ok {
-			log.Printf("FrameDrop: parent frame not found: %d", f.parentID)
-			return
-		}
-		parent = parentFrame.div
-	}
-
-	parent.Call(jsw.RemoveChild, f.div)
 	f.div.Call(jsw.Remove)
 
 	delete(w.frames, frameID)
@@ -124,4 +111,24 @@ func (w *webAPI) frameOffset(frameID int) (int, int) {
 	return x, y
 }
 
-func (w *webAPI) FrameRaise(frameID int) {}
+func (w *webAPI) FrameRaise(frameID int) {
+	w.mutex.RLock()
+	defer w.mutex.RUnlock()
+	f, ok := w.frames[frameID]
+	if !ok {
+		log.Printf("FrameRaise: frame not found: %d", frameID)
+		return
+	}
+
+	if f.parentID == 0 {
+		return
+	}
+
+	parentFrame, ok := w.frames[f.parentID]
+	if !ok {
+		log.Printf("FrameRaise: parent frame not found: %d", f.parentID)
+		return
+	}
+
+	parentFrame.div.Call(jsw.AppendChild, f.div)
+}

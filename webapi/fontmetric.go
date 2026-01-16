@@ -69,7 +69,6 @@ func (w *webAPI) FontMetricSplit(fontID int, text string, edge, indent int) []in
 
 	output := textSplit(p, f, text)
 
-	w.document.Get(jsw.Body).Call(jsw.RemoveChild, p)
 	p.Call(jsw.Remove)
 
 	return output

@@ -39,10 +39,3 @@ func color(r, g, b, a uint16) string {
 func px(value int) string {
 	return fmt.Sprintf("%dpx", value)
 }
-
-func abs(a int) int {
-	if a < 0 {
-		return -a
-	}
-	return a
-}

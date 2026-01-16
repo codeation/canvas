@@ -15,6 +15,7 @@ type webAPI struct {
 	windows     map[int]*window
 	fonts       map[int]*font
 	metricFonts map[int]*font
+	images      map[int]*image
 	mutex       sync.RWMutex
 }
 
@@ -26,6 +27,7 @@ func New() *webAPI {
 		windows:     map[int]*window{},
 		fonts:       map[int]*font{},
 		metricFonts: map[int]*font{},
+		images:      map[int]*image{},
 	}
 
 	w.document.Get(jsw.Body).Get(jsw.Style).Set(jsw.Margin, 0)
