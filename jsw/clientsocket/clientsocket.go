@@ -1,8 +1,8 @@
 package clientsocket
 
 import (
-	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"syscall/js"
 
@@ -14,21 +14,20 @@ type ClientSocket struct {
 	ws          js.Value
 	listeners   *eventlist.EventListeners
 	waitOpening chan struct{}
-	reader      io.Reader
-	writer      *io.PipeWriter
-	closer      *io.PipeReader
+	pipeReader  *io.PipeReader
+	pipeWriter  *io.PipeWriter
 }
 
 func Dial(address string) *ClientSocket {
 	pipeReader, pipeWriter := io.Pipe()
 	ws := js.Global().Get(jsw.WebSocket).New(address)
+	ws.Set(jsw.BinaryType, jsw.ArrayBuffer)
 	c := &ClientSocket{
 		ws:          ws,
 		listeners:   eventlist.NewEventListeners(ws),
 		waitOpening: make(chan struct{}),
-		reader:      base64.NewDecoder(base64.StdEncoding, pipeReader),
-		writer:      pipeWriter,
-		closer:      pipeReader,
+		pipeReader:  pipeReader,
+		pipeWriter:  pipeWriter,
 	}
 	c.listeners.Add(jsw.Open, c.onOpen)
 	c.listeners.Add(jsw.Error, c.onError)
@@ -38,20 +37,22 @@ func Dial(address string) *ClientSocket {
 }
 
 func (c *ClientSocket) Close() error {
-	c.closer.Close()
 	c.listeners.Done()
+	c.pipeWriter.Close()
 	c.ws.Call(jsw.Close)
 	return nil
 }
 
 func (c *ClientSocket) Write(data []byte) (int, error) {
 	<-c.waitOpening
-	c.ws.Call(jsw.Send, base64.StdEncoding.EncodeToString(data))
+	uint8Array := js.Global().Get(jsw.Uint8Array).New(len(data))
+	js.CopyBytesToJS(uint8Array, data)
+	c.ws.Call(jsw.Send, uint8Array)
 	return len(data), nil
 }
 
 func (c *ClientSocket) Read(data []byte) (int, error) {
-	return c.reader.Read(data)
+	return c.pipeReader.Read(data)
 }
 
 func (c *ClientSocket) onOpen(this js.Value, args []js.Value) any {
@@ -60,19 +61,30 @@ func (c *ClientSocket) onOpen(this js.Value, args []js.Value) any {
 }
 
 func (c *ClientSocket) onError(this js.Value, args []js.Value) any {
-	c.closer.CloseWithError(errors.New(args[0].Get(jsw.Type).String()))
+	err := errors.New("WebSocket error event")
+	c.pipeWriter.CloseWithError(err)
 	return nil
 }
 
 func (c *ClientSocket) onClose(this js.Value, args []js.Value) any {
-	c.Close()
+	err := fmt.Errorf("WebSocket closed: %d", args[0].Get(jsw.Code).Int())
+	c.pipeWriter.CloseWithError(err)
 	return nil
 }
 
 func (c *ClientSocket) onMessage(this js.Value, args []js.Value) any {
-	message := args[0]
-	if _, err := c.writer.Write([]byte(message.Get(jsw.Data).String())); err != nil {
-		c.writer.CloseWithError(err)
+	data := args[0].Get(jsw.Data)
+	if data.Type() == js.TypeString {
+		if _, err := c.pipeWriter.Write([]byte(data.String())); err != nil {
+			c.pipeWriter.CloseWithError(err)
+		}
+		return nil
+	}
+	uint8Array := js.Global().Get(jsw.Uint8Array).New(data)
+	buffer := make([]byte, uint8Array.Get(jsw.ByteLength).Int())
+	js.CopyBytesToGo(buffer, uint8Array)
+	if _, err := c.pipeWriter.Write(buffer); err != nil {
+		c.pipeWriter.CloseWithError(err)
 	}
 	return nil
 }

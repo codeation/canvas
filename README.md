@@ -58,7 +58,7 @@ To run :
 ```
 git clone https://github.com/codeation/canvas.git
 cd canvas
-cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
+cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" .
 GOOS=js GOARCH=wasm go build -o main.wasm ./cmd/
 go run ./examples/wasm
 ```
