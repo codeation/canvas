@@ -1,6 +1,6 @@
-github.com/codeation/impress v1.0.6 h1:MTrNA7ODoHCSIeDpUoe0QIOU2PBGtWYVjHq6dn9ivWk=
-github.com/codeation/impress v1.0.6/go.mod h1:TDIX4A6nLhVn4l6xddcBzOJgjFg1u9GD180nLYDVAcs=
+github.com/codeation/impress v1.0.7 h1:hEPlXmZImpWvhTjkoMSBgbVncLjSjtC/TIFwGFIRU4M=
+github.com/codeation/impress v1.0.7/go.mod h1:WWbb8KHApn5AfNI9Ld4gK+ITKeRnwZCEWDHAuSCiics=
 github.com/codeation/lru v1.3.0 h1:BZlD5G4bt0bis9FHV5q3zyyDCAx21ue2CvvM1T8hQl4=
 github.com/codeation/lru v1.3.0/go.mod h1:1C9+zUoRETpelIbMxh6wj9APf2VnKh0tk9aRsrOQUsk=
-golang.org/x/net v0.49.0 h1:eeHFmOGUTtaaPSGNmjBKpbng9MulQsJURQUAfUwY++o=
-golang.org/x/net v0.49.0/go.mod h1:/ysNB2EvaqvesRkuLAyjI1ycPZlQHM3q01F02UY/MV8=
+golang.org/x/net v0.50.0 h1:ucWh9eiCGyDR3vtzso0WMQinm2Dnt8cFMuQa9K33J60=
+golang.org/x/net v0.50.0/go.mod h1:UgoSli3F/pBgdJBHCTc+tp3gmrU4XswgGRgtnwWTfyM=
