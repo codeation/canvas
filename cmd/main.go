@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"sync"
 
 	"github.com/codeation/impress/joint/drawrecv"
 	"github.com/codeation/impress/joint/eventsend"
@@ -19,9 +18,9 @@ func main() {
 	syncSocket := clientsocket.Dial("sync")
 	defer syncSocket.Close()
 
-	eventPipe := rpc.NewPipe(new(sync.Mutex), bufio.NewWriter(asyncSocket), nil)
-	streamPipe := rpc.NewPipe(rpc.WithoutMutex(), nil, asyncSocket)
-	syncPipe := rpc.NewPipe(rpc.WithoutMutex(), bufio.NewWriter(syncSocket), syncSocket)
+	eventPipe := rpc.NewPipe(bufio.NewWriter(asyncSocket), nil)
+	streamPipe := rpc.NewPipe(nil, asyncSocket)
+	syncPipe := rpc.NewPipe(bufio.NewWriter(syncSocket), syncSocket)
 
 	api := webapi.New()
 	d := drawrecv.New(api, streamPipe, syncPipe)

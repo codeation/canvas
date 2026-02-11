@@ -33,18 +33,20 @@ func Dial(address string) *ClientSocket {
 	c.listeners.Add(jsw.Error, c.onError)
 	c.listeners.Add(jsw.Close, c.onClose)
 	c.listeners.Add(jsw.Message, c.onMessage)
+	if c.ws.Get(jsw.ReadyState).Int() == 1 {
+		c.markOpened()
+	}
+	<-c.waitOpening
 	return c
 }
 
 func (c *ClientSocket) Close() error {
 	c.listeners.Done()
-	c.pipeWriter.Close()
 	c.ws.Call(jsw.Close)
-	return nil
+	return c.pipeWriter.Close()
 }
 
 func (c *ClientSocket) Write(data []byte) (int, error) {
-	<-c.waitOpening
 	uint8Array := js.Global().Get(jsw.Uint8Array).New(len(data))
 	js.CopyBytesToJS(uint8Array, data)
 	c.ws.Call(jsw.Send, uint8Array)
@@ -55,12 +57,21 @@ func (c *ClientSocket) Read(data []byte) (int, error) {
 	return c.pipeReader.Read(data)
 }
 
+func (c *ClientSocket) markOpened() {
+	select {
+	case <-c.waitOpening:
+	default:
+		close(c.waitOpening)
+	}
+}
+
 func (c *ClientSocket) onOpen(this js.Value, args []js.Value) any {
-	close(c.waitOpening)
+	c.markOpened()
 	return nil
 }
 
 func (c *ClientSocket) onError(this js.Value, args []js.Value) any {
+	defer c.markOpened()
 	err := errors.New("WebSocket error event")
 	c.pipeWriter.CloseWithError(err)
 	return nil

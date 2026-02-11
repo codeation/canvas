@@ -69,6 +69,7 @@ const (
 	PreventDefault         = "preventDefault"
 	PutImageData           = "putImageData"
 	Range                  = "Range"
+	ReadyState             = "readyState"
 	Remove                 = "remove"
 	RemoveEventListener    = "removeEventListener"
 	Resize                 = "resize"
