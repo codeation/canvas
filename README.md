@@ -71,4 +71,4 @@ To see results, open `http://localhost:8080/` in you browser. Please, try with B
 
 - The performance of the browser will not be enough for the regular use.
 - This project is still in the early stages of development and is not yet in a usable state.
-- The project was tested on Debian 13.1 with Firefox browser.
+- The project was tested on Debian 13.3 with Firefox browser.
