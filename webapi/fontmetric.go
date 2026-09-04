@@ -17,7 +17,7 @@ func (w *webAPI) FontMetricNew(fontID int, height int, style, variant, weight, s
 	metrics := canvasCtx.Call(jsw.MeasureText, "Gg")
 	ascent := int(metrics.Get(jsw.FontBoundingBoxAscent).Float())
 	descent := int(metrics.Get(jsw.FontBoundingBoxDescent).Float())
-	lineheight := height
+	lineheight := height * 115 / 100
 	baseline := ascent
 
 	w.metricFonts[fontID] = &font{
@@ -65,6 +65,8 @@ func (w *webAPI) FontMetricSplit(fontID int, text string, edge, indent int) []in
 	pStyle.Set(jsw.Width, px(edge))
 	pStyle.Set(jsw.TextIndent, px(indent))
 	pStyle.Set(jsw.LineHeight, 1)
+	pStyle.Set(jsw.OverflowWrap, jsw.BreakWord)
+	pStyle.Set(jsw.WordBreak, jsw.BreakWord)
 	w.document.Get(jsw.Body).Call(jsw.AppendChild, p)
 
 	output := textSplit(p, f, text)
@@ -74,11 +76,11 @@ func (w *webAPI) FontMetricSplit(fontID int, text string, edge, indent int) []in
 	return output
 }
 
-func runePos(p js.Value, f *font, index int) (int, int) {
+func runePos(p js.Value, f *font, index int) int {
 	f.r.Call(jsw.SetStart, p.Get(jsw.FirstChild), index)
 	f.r.Call(jsw.SetEnd, p.Get(jsw.FirstChild), index+1)
-	offsets := f.r.Call(jsw.GetBoundingClientRect)
-	return offsets.Get(jsw.Left).Int(), offsets.Get(jsw.Top).Int()
+	rect := f.r.Call(jsw.GetBoundingClientRect)
+	return rect.Get(jsw.Left).Int()
 }
 
 func textSplit(p js.Value, f *font, text string) []int {
@@ -87,9 +89,9 @@ func textSplit(p js.Value, f *font, text string) []int {
 	cut := 0
 	index := 0
 	for i := range text {
-		x, _ := runePos(p, f, index)
+		x := runePos(p, f, index)
 		index++
-		if x < x0 {
+		if i != 0 && x < x0 {
 			output = append(output, i-cut)
 			cut = i
 		}

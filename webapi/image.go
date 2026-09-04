@@ -33,13 +33,11 @@ func (w *webAPI) ImageNew(imageID int, width, height int, bitmap []byte) {
 func (w *webAPI) ImageDrop(imageID int) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
-	image, ok := w.images[imageID]
+	_, ok := w.images[imageID]
 	if !ok {
 		log.Printf("ImageDrop: image not found: %d", imageID)
 		return
 	}
-
-	image.canvas.Call(jsw.Remove)
 
 	delete(w.images, imageID)
 }
