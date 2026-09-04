@@ -33,6 +33,8 @@ func New() *webAPI {
 	w.document.Get(jsw.Body).Get(jsw.Style).Set(jsw.Margin, 0)
 	w.document.Get(jsw.Body).Get(jsw.Style).Set(jsw.Padding, 0)
 
+	w.document.Get(jsw.Body).Get(jsw.Style).Set(jsw.TouchAction, jsw.None)
+
 	return w
 }
 

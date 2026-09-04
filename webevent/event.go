@@ -15,14 +15,23 @@ type webEvent struct {
 	callbacks iface.CallbackSet
 	window    js.Value
 	listeners *eventlist.EventListeners
+	input     js.Value
 }
 
 func New(callbacks iface.CallbackSet) *webEvent {
 	window := js.Global().Get(jsw.Window)
+	document := js.Global().Get(jsw.Document)
+
+	input := document.Call(jsw.CreateElement, jsw.Input)
+	input.Call(jsw.SetAttribute, jsw.Type, jsw.Text)
+	input.Get(jsw.Style).Set(jsw.BorderStyle, jsw.None)
+	document.Get(jsw.Body).Call(jsw.AppendChild, input)
+
 	w := &webEvent{
 		callbacks: callbacks,
 		window:    window,
 		listeners: eventlist.NewEventListeners(window),
+		input:     input,
 	}
 
 	go w.onResize(js.ValueOf(nil), nil)
@@ -40,11 +49,14 @@ func New(callbacks iface.CallbackSet) *webEvent {
 	w.listeners.Add(jsw.Unload, w.onUnload)
 	w.listeners.Add(jsw.Beforeunload, w.onUnload)
 
+	w.listeners.Add(jsw.Touchmove, w.onTouchMove)
+
 	return w
 }
 
 func (w *webEvent) Done() {
 	w.listeners.Done()
+	w.input.Call(jsw.Remove)
 }
 
 func (w *webEvent) onResize(this js.Value, args []js.Value) any {
@@ -115,6 +127,7 @@ func (w *webEvent) onWheel(this js.Value, args []js.Value) any {
 }
 
 func (w *webEvent) onKeyDown(this js.Value, args []js.Value) any {
+	defer w.input.Set(jsw.Value, "")
 	if len(args) < 1 {
 		return js.ValueOf(false)
 	}
@@ -136,4 +149,17 @@ func (w *webEvent) onKeyDown(this js.Value, args []js.Value) any {
 func (w *webEvent) onUnload(this js.Value, args []js.Value) any {
 	w.callbacks.EventGeneral(event.DestroyEvent.Event)
 	return js.ValueOf(true)
+}
+
+func (w *webEvent) onTouchMove(this js.Value, args []js.Value) any {
+	if len(args) < 1 {
+		return js.ValueOf(false)
+	}
+	touches := args[0].Get(jsw.Touches)
+	if touches.Length() > 0 {
+		if touches.Index(0).Get(jsw.ClientY).Int() < 40 {
+			w.input.Call(jsw.Focus)
+		}
+	}
+	return js.ValueOf(false)
 }
